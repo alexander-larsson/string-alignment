@@ -24,4 +24,22 @@ CODE
 ===============================================================================================
 \begin{code}
 
+scoreMatch = 1
+scoreMismatch = -1
+scoreSpace = -2
+
+
+similarityScore :: String -> String -> Int
+similarityScore [] [] = 0
+similarityScore [] (y:ys) = scoreSpace * length (y:ys)
+similarityScore (x:xs) [] = scoreSpace * length (x:xs)
+similarityScore (x:xs) (y:ys) =  maximum [similarityScore xs ys + score(x,y), similarityScore xs (y:ys) + score(x,'-'), similarityScore (x:xs) ys + score('-',y)]
+
+
+score (x,'-') = scoreSpace
+score ('-',y) = scoreSpace
+score (x, y)
+	| x == y = scoreMatch
+	| otherwise = scoreMismatch
+
 \end{code}
