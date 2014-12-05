@@ -32,10 +32,14 @@ CODE
 module Alignment where
 import Data.List
 
-scoreMatch = 1
-scoreMismatch = -1
-scoreSpace = -2
+type AlignmentType = (String,String)
 
+scoreMatch = 0
+scoreMismatch = -1
+scoreSpace = -1
+
+string1 = "writers"
+string2 = "vintner"
 
 similarityScore :: String -> String -> Int
 similarityScore [] [] = 0
@@ -55,5 +59,12 @@ attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 
 maximaBy :: Ord b => (a -> b) -> [a] -> [a]
 maximaBy f xs = last . groupBy (\x y -> (f x) == (f y)) $ (sortBy (\x y -> compare (f x) (f y)) xs)
+
+optAlignments :: String -> String -> [AlignmentType]
+optAlignments [] [] = [("","")]
+optAlignments [] (y:ys) = attachHeads '-' y (optAlignments [] ys)
+optAlignments (x:xs) [] = attachHeads x '-' (optAlignments xs [])
+optAlignments (x:xs) (y:ys) = maximaBy quickScore $ concat [attachHeads x y (optAlignments xs ys), attachHeads x '-' (optAlignments xs (y:ys)), attachHeads '-' y (optAlignments (x:xs) ys)]
+	where quickScore (xs,ys) = sum $ zipWith (\x y -> score (x,y)) xs ys
 
 \end{code}
