@@ -67,4 +67,10 @@ optAlignments (x:xs) [] = attachHeads x '-' (optAlignments xs [])
 optAlignments (x:xs) (y:ys) = maximaBy quickScore $ concat [attachHeads x y (optAlignments xs ys), attachHeads x '-' (optAlignments xs (y:ys)), attachHeads '-' y (optAlignments (x:xs) ys)]
 	where quickScore (xs,ys) = sum $ zipWith (\x y -> score (x,y)) xs ys
 
+outputOptAlignments :: String -> String -> IO ()
+outputOptAlignments string1 string2 = do
+	let optAlign = optAlignments string1 string2
+	let lineUp (x, y) = x ++ "\n" ++ y
+	putStrLn ("\nThere are " ++ (show . length $ optAlign) ++ " optimal alignments:\n\n")
+	mapM_ putStrLn $ (intersperse "\n" $ map lineUp optAlign) ++ ["\n"]
 \end{code}
