@@ -19,6 +19,12 @@ scoreSpace = 0
 The algorithm will then find the maximum amount of matches which is the MCS of the two
 sequences.
 
+
+2.b It takes two heads of type a and a list of pairs containing lists of type a. For every pair
+in the list it will attach the heads at the first position in each of the lists it contains. The
+first head, h1, is attached to the first list in the tuple and h2 is attached to the second list
+in the tuple. The same two heads are attached to all tuples in the list.
+
 ===============================================================================================
 CODE
 ===============================================================================================
@@ -35,11 +41,14 @@ similarityScore [] (y:ys) = scoreSpace * length (y:ys)
 similarityScore (x:xs) [] = scoreSpace * length (x:xs)
 similarityScore (x:xs) (y:ys) =  maximum [similarityScore xs ys + score(x,y), similarityScore xs (y:ys) + score(x,'-'), similarityScore (x:xs) ys + score('-',y)]
 
-
+score :: (Char, Char) -> Int
 score (x,'-') = scoreSpace
 score ('-',y) = scoreSpace
 score (x, y)
 	| x == y = scoreMatch
 	| otherwise = scoreMismatch
+
+attachHeads :: a -> a -> [([a],[a])] -> [([a],[a])] 
+attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 
 \end{code}
