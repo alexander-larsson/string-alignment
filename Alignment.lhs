@@ -51,4 +51,12 @@ score (x, y)
 attachHeads :: a -> a -> [([a],[a])] -> [([a],[a])] 
 attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 
+maximaBy :: Ord b => (a -> b) -> [a] -> [a]
+maximaBy valueFcn [x] = [x]
+maximaBy valueFcn (x:xs)
+	| valueFcn x > largest = [x]
+	| valueFcn x < largest = maximaBy valueFcn xs
+	| valueFcn x == largest = x:(maximaBy valueFcn xs)
+	where largest = valueFcn . head . maximaBy valueFcn $ xs
+
 \end{code}
