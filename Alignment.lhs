@@ -29,6 +29,8 @@ in the tuple. The same two heads are attached to all tuples in the list.
 CODE
 ===============================================================================================
 \begin{code}
+module Alignment where
+import Data.List
 
 scoreMatch = 1
 scoreMismatch = -1
@@ -52,11 +54,6 @@ attachHeads :: a -> a -> [([a],[a])] -> [([a],[a])]
 attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 
 maximaBy :: Ord b => (a -> b) -> [a] -> [a]
-maximaBy valueFcn [x] = [x]
-maximaBy valueFcn (x:xs)
-	| valueFcn x > largest = [x]
-	| valueFcn x < largest = maximaBy valueFcn xs
-	| valueFcn x == largest = x:(maximaBy valueFcn xs)
-	where largest = valueFcn . head . maximaBy valueFcn $ xs
+maximaBy f xs = last . groupBy (\x y -> (f x) == (f y)) $ (sortBy (\x y -> compare (f x) (f y)) xs)
 
 \end{code}
