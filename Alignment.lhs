@@ -73,6 +73,9 @@ score (x, y)
 attachHeads :: a -> a -> [([a],[a])] -> [([a],[a])] 
 attachHeads h1 h2 aList = [(h1:xs,h2:ys) | (xs,ys) <- aList]
 
+attachTails :: a -> a -> [([a],[a])] -> [([a],[a])] 
+attachTails t1 t2 aList = [(xs++[t1],ys++[t2]) | (xs,ys) <- aList]
+
 maximaBy :: Ord b => (a -> b) -> [a] -> [a]
 maximaBy f xs = last . groupBy (\x y -> (f x) == (f y)) $ (sortBy (\x y -> compare (f x) (f y)) xs)
 
@@ -83,9 +86,36 @@ optAlignments (x:xs) [] = attachHeads x '-' (optAlignments xs [])
 optAlignments (x:xs) (y:ys) = maximaBy quickScore $ concat [attachHeads x y (optAlignments xs ys), attachHeads x '-' (optAlignments xs (y:ys)), attachHeads '-' y (optAlignments (x:xs) ys)]
 	where quickScore (xs,ys) = sum $ zipWith (\x y -> score (x,y)) xs ys
 
+fastOptAlignments :: String -> String -> [AlignmentType]
+fastOptAlignments xs ys = getAlignments (length xs) (length ys)
+  where
+    simScore i j = simTable!!i!!j
+    simTable = [[ simEntry i j | j<-[0..]] | i<-[0..] ]
+    
+    getScore :: Int -> Int -> Int
+    getScore i j = fst $ simScore i j
+
+    getAlignments :: Int -> Int -> [AlignmentType]
+    getAlignments i j = snd $ simScore i j
+
+    simEntry :: Int -> Int -> (Int, [AlignmentType])
+    simEntry 0 0 = (0,[("","")])
+    simEntry i 0 = (getScore (i-1) 0 + scoreSpace, attachTails (xs!!(i-1)) '-' (getAlignments (i-1) 0))
+    simEntry 0 j = (getScore 0 (j-1) + scoreSpace, attachTails '-' (ys!!(j-1)) (getAlignments 0 (j-1)))
+    simEntry i j
+      | x == y    = (scoreMatch + getScore (i-1) (j-1), attachTails x y (getAlignments (i-1) (j-1)))
+      | otherwise = (fst $ head optimalPossibilites, concat . map snd $ optimalPossibilites)
+      where
+         x = xs!!(i-1)
+         y = ys!!(j-1)
+         pos1 = (getScore (i-1) (j-1) + scoreMismatch, attachTails x y (getAlignments (i-1) (j-1)))
+         pos2 = (getScore i (j-1) + scoreSpace, attachTails '-' y (getAlignments i (j-1)))
+         pos3 = (getScore (i-1) j + scoreSpace, attachTails x '-' (getAlignments (i-1) j))
+         optimalPossibilites = maximaBy fst [pos1, pos2, pos3]
+
 outputOptAlignments :: String -> String -> IO ()
 outputOptAlignments string1 string2 = do
-	let optAlign = optAlignments string1 string2
+	let optAlign = fastOptAlignments string1 string2
 	let lineUp (x, y) = "\n" ++ x ++ "\n" ++ y ++ "\n"
 	putStrLn ("\nThere are " ++ (show . length $ optAlign) ++ " optimal alignments:\n")
 	mapM_ putStrLn $ map lineUp optAlign
