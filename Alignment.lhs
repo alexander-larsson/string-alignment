@@ -47,6 +47,22 @@ similarityScore [] (y:ys) = scoreSpace * length (y:ys)
 similarityScore (x:xs) [] = scoreSpace * length (x:xs)
 similarityScore (x:xs) (y:ys) =  maximum [similarityScore xs ys + score(x,y), similarityScore xs (y:ys) + score(x,'-'), similarityScore (x:xs) ys + score('-',y)]
 
+fastSimilarityScore :: String -> String -> Int
+fastSimilarityScore xs ys = simScore (length xs) (length ys)
+  where
+    simScore i j = simTable!!i!!j
+    simTable = [[ simEntry i j | j<-[0..]] | i<-[0..] ]
+       
+    simEntry :: Int -> Int -> Int
+    simEntry i 0 = scoreSpace*i
+    simEntry 0 j = scoreSpace*j
+    simEntry i j
+      | x == y    = scoreMatch + simScore (i-1) (j-1)
+      | otherwise = maximum [scoreMismatch + simScore (i-1) (j-1), scoreSpace + simScore i (j-1), scoreSpace + simScore (i-1) j]
+      where
+         x = xs!!(i-1)
+         y = ys!!(j-1)
+
 score :: (Char, Char) -> Int
 score (x,'-') = scoreSpace
 score ('-',y) = scoreSpace
