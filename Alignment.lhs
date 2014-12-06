@@ -70,7 +70,7 @@ optAlignments (x:xs) (y:ys) = maximaBy quickScore $ concat [attachHeads x y (opt
 outputOptAlignments :: String -> String -> IO ()
 outputOptAlignments string1 string2 = do
 	let optAlign = optAlignments string1 string2
-	let lineUp (x, y) = x ++ "\n" ++ y
-	putStrLn ("\nThere are " ++ (show . length $ optAlign) ++ " optimal alignments:\n\n")
-	mapM_ putStrLn $ (intersperse "\n" $ map lineUp optAlign) ++ ["\n"]
+	let lineUp (x, y) = "\n" ++ x ++ "\n" ++ y ++ "\n"
+	putStrLn ("\nThere are " ++ (show . length $ optAlign) ++ " optimal alignments:\n")
+	mapM_ putStrLn $ map lineUp optAlign
 \end{code}
