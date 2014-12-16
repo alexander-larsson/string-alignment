@@ -77,14 +77,15 @@ attachTails :: a -> a -> [([a],[a])] -> [([a],[a])]
 attachTails t1 t2 aList = [(xs++[t1],ys++[t2]) | (xs,ys) <- aList]
 
 maximaBy :: Ord b => (a -> b) -> [a] -> [a]
+maximaBy _ [] = []
 maximaBy f xs = last . groupBy (\x y -> (f x) == (f y)) $ (sortBy (\x y -> compare (f x) (f y)) xs)
 
 optAlignments :: String -> String -> [AlignmentType]
 optAlignments [] [] = [("","")]
-optAlignments [] (y:ys) = attachHeads '-' y (optAlignments [] ys)
-optAlignments (x:xs) [] = attachHeads x '-' (optAlignments xs [])
+optAlignments [] ys = [(replicate (length ys) '-',ys)]
+optAlignments xs [] = [(xs,replicate (length xs) '-')]
 optAlignments (x:xs) (y:ys) = maximaBy quickScore $ concat [attachHeads x y (optAlignments xs ys), attachHeads x '-' (optAlignments xs (y:ys)), attachHeads '-' y (optAlignments (x:xs) ys)]
-	where quickScore (xs,ys) = sum $ zipWith (\x y -> score (x,y)) xs ys
+	where quickScore (xs,ys) = sum $ zipWith (curry score) xs ys
 
 fastOptAlignments :: String -> String -> [AlignmentType]
 fastOptAlignments xs ys = getAlignments (length xs) (length ys)
