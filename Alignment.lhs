@@ -88,30 +88,27 @@ optAlignments (x:xs) (y:ys) = maximaBy quickScore $ concat [attachHeads x y (opt
 	where quickScore (xs,ys) = sum $ zipWith (curry score) xs ys
 
 fastOptAlignments :: String -> String -> [AlignmentType]
-fastOptAlignments xs ys = getAlignments (length xs) (length ys)
+fastOptAlignments xs ys = snd $ simScore (length xs) (length ys)
   where
     simScore i j = simTable!!i!!j
     simTable = [[ simEntry i j | j<-[0..]] | i<-[0..] ]
-    
-    getScore :: Int -> Int -> Int
-    getScore i j = fst $ simScore i j
 
-    getAlignments :: Int -> Int -> [AlignmentType]
-    getAlignments i j = snd $ simScore i j
+    newEntry :: (Int, Char, Char) -> (Int, [AlignmentType]) -> (Int, [AlignmentType])
+    newEntry (score, x, y) (prevScore, prevAlign) = (score + prevScore, attachTails x y prevAlign)
 
     simEntry :: Int -> Int -> (Int, [AlignmentType])
     simEntry 0 0 = (0,[("","")])
     simEntry i 0 = (scoreSpace*i, [(take i ys, replicate i '-')])
     simEntry 0 j = (scoreSpace*j, [(replicate j '-', take j xs)])
     simEntry i j
-      | x == y    = (scoreMatch + getScore (i-1) (j-1), attachTails x y (getAlignments (i-1) (j-1)))
+      | x == y    = newEntry (scoreMatch,x,y) (simScore (i-1) (j-1))
       | otherwise = (fst $ head optimalPossibilites, concat . map snd $ optimalPossibilites)
       where
          x = xs!!(i-1)
          y = ys!!(j-1)
-         pos1 = (getScore (i-1) (j-1) + scoreMismatch, attachTails x y (getAlignments (i-1) (j-1)))
-         pos2 = (getScore i (j-1) + scoreSpace, attachTails '-' y (getAlignments i (j-1)))
-         pos3 = (getScore (i-1) j + scoreSpace, attachTails x '-' (getAlignments (i-1) j))
+         pos1 = newEntry (scoreMismatch, x, y) (simScore (i-1) (j-1))
+         pos2 = newEntry (scoreSpace, '-', y) (simScore i (j-1))
+         pos3 = newEntry (scoreSpace, x, '-') (simScore (i-1) j)
          optimalPossibilites = maximaBy fst [pos1, pos2, pos3]
 
 outputOptAlignments :: String -> String -> IO ()
