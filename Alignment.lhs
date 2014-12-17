@@ -101,8 +101,8 @@ fastOptAlignments xs ys = getAlignments (length xs) (length ys)
 
     simEntry :: Int -> Int -> (Int, [AlignmentType])
     simEntry 0 0 = (0,[("","")])
-    simEntry i 0 = (getScore (i-1) 0 + scoreSpace, attachTails (xs!!(i-1)) '-' (getAlignments (i-1) 0))
-    simEntry 0 j = (getScore 0 (j-1) + scoreSpace, attachTails '-' (ys!!(j-1)) (getAlignments 0 (j-1)))
+    simEntry i 0 = (scoreSpace*i, [(take i ys, replicate i '-')])
+    simEntry 0 j = (scoreSpace*j, [(replicate j '-', take j xs)])
     simEntry i j
       | x == y    = (scoreMatch + getScore (i-1) (j-1), attachTails x y (getAlignments (i-1) (j-1)))
       | otherwise = (fst $ head optimalPossibilites, concat . map snd $ optimalPossibilites)
