@@ -16,8 +16,9 @@ scoreMatch = 1
 scoreMismatch = 0
 scoreSpace = 0
 
-The algorithm will then find the maximum amount of matches which is the MCS of the two
-sequences.
+The algorithm will then find the alignment with the maximum amount of matches between the two
+strings. If we then take any of the two string and remove all spaces and mismatches we will get
+the MCS of the two strings.
 
 
 2.b It takes two heads of type a and a list of pairs containing lists of type a. For every pair
